@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Date Picker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #d4f5d3; /* Soft green */
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: auto;
+        }
+        .question {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .options button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 10px;
+            border: none;
+            background-color: #a8e6a3;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .options button:hover {
+            background-color: #8fd38a;
+        }
+        #result {
+            display: none;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #2d6a4f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Find Your Perfect Date Spot</h2>
+        <div id="question-container">
+            <p class="question" id="question-text"></p>
+            <div class="options" id="options-container"></div>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                text: "How far do you want to go?",
+                options: ["Nearby", "A bit far", "Long trip"],
+                key: "distance"
+            },
+            {
+                text: "What is your travel option today?",
+                options: ["Walking", "Metro", "Scooty"],
+                key: "travel"
+            },
+            {
+                text: "Do you have money to spend today?",
+                options: ["Yes", "No"],
+                key: "budget"
+            },
+            {
+                text: "What kind of vibe are you in for today?",
+                options: ["Relaxed & Comfy", "Outdoorsy", "Musical & Artsy", "Food Adventure"],
+                key: "vibe"
+            },
+            {
+                text: "What time do you plan to go on a date?",
+                options: ["Morning", "Evening", "Night"],
+                key: "time"
+            },
+            {
+                text: "What kind of food are you craving?",
+                options: ["Ice Cream", "Pastries", "Mandi", "Pasta", "Full Meal"],
+                key: "food",
+                condition: (answers) => answers.vibe === "Food Adventure"
+            },
+            {
+                text: "What kind of clothes are you wearing today?",
+                options: ["Casual & Relaxed", "All Trusted"],
+                key: "clothes",
+                condition: (answers) => answers.vibe !== "Relaxed & Comfy" && answers.vibe !== "Food Adventure"
+            },
+            {
+                text: "Do you want a surprise element?",
+                options: ["Yes, surprise me!", "No, let's be specific"],
+                key: "surprise"
+            }
+        ];
+
+        const places = {
+            "Nearby": { "Relaxed & Comfy": "Lulu Mall", "Outdoorsy": "Marine Drive", "Musical & Artsy": "David Hall", "Food Adventure": "Cake Reels" },
+            "A bit far": { "Relaxed & Comfy": "Aluva Manapuram", "Outdoorsy": "Subhash Park", "Musical & Artsy": "Fort Kochi", "Food Adventure": "Pandal Café" },
+            "Long trip": { "Relaxed & Comfy": "Beach", "Outdoorsy": "Kadamakudi", "Musical & Artsy": "Mattancherry", "Food Adventure": "Kubaba" }
+        };
+
+        const cafes = {
+            "Ice Cream": "Paul's Creamery",
+            "Pastries": "Coco Tree MG Road Cakes",
+            "Mandi": "Kubaba",
+            "Pasta": "Cake Reels",
+            "Full Meal": "Thaal Kitchen MG Road"
+        };
+
+        let currentQuestionIndex = 0;
+        let answers = {};
+
+        function showQuestion() {
+            const questionObj = questions[currentQuestionIndex];
+
+            if (questionObj.condition && !questionObj.condition(answers)) {
+                currentQuestionIndex++;
+                showQuestion();
+                return;
+            }
+
+            document.getElementById("question-text").innerText = questionObj.text;
+            const optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+
+            questionObj.options.forEach(option => {
+                const button = document.createElement("button");
+                button.innerText = option;
+                button.onclick = () => {
+                    answers[questionObj.key] = option;
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < questions.length) {
+                        showQuestion();
+                    } else {
+                        showResult();
+                    }
+                };
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function showResult() {
+            let chosenPlace = places[answers.distance]?.[answers.vibe];
+
+            if (answers.vibe === "Food Adventure") {
+                chosenPlace = cafes[answers.food] || "A random café";
+            }
+
+            if (answers.surprise === "Yes, surprise me!") {
+                chosenPlace = "A surprise spot! You'll find out when you get there!";
+            }
+
+            document.getElementById("question-container").style.display = "none";
+            document.getElementById("result").innerText = `Your perfect date spot: ${chosenPlace}`;
+            document.getElementById("result").style.display = "block";
+        }
+
+        showQuestion();
+    </script>
+</body>
+</html>
